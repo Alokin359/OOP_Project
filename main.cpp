@@ -76,6 +76,48 @@ public:
     bool getSubtaskStatus(int i) const { return subtaskStatuses[i]; }
 };
 
+class TaskManager {
+private:
+    vector<Task*> tasks;
+
+public:
+    ~TaskManager() {
+        for (Task* t : tasks) {
+            delete t;
+        }
+    }
+
+    void addTask(Task* task) {
+        tasks.push_back(task);
+    }
+
+    void printTasks() const {
+        if (tasks.empty()) {
+            cout << "\n Няма намерени задачи.\n";
+            return;
+        }
+        cout << "\n--- СПИСЪК СЪС ЗАДАЧИ ---\n";
+        for (const Task* task : tasks) {
+            cout << "[" << task->getId() << "] " << task->getTitle() 
+                 << " (" << task->getType() << ") | Прогрес: " << task->getProgress() << "%\n";
+        }
+    }
+
+    Task* findTaskById(string id) {
+        for (Task* task : tasks) {
+            if (task->getId() == id) {
+                return task;
+            }
+        }
+        return nullptr;
+    }
+
+    const vector<Task*>& getTasks() const { return tasks; } 
+    void clearTasks() { 
+        for (Task* t : tasks) delete t;
+        tasks.clear(); 
+    }
+};
 
 int main() {
     
