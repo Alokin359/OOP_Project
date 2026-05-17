@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream> 
+#include <sstream> 
 
 using namespace std;
 
@@ -113,11 +114,13 @@ public:
     }
 
     const vector<Task*>& getTasks() const { return tasks; } 
+    
     void clearTasks() { 
         for (Task* t : tasks) delete t;
         tasks.clear(); 
     }
 
+    // Коригиран метод: Вече записва и подзадачите на проекта на същия ред
     void saveToFile(string filename) {
         ofstream outFile(filename);
         if (!outFile) {
@@ -125,12 +128,23 @@ public:
             return;
         }
         for (const Task* t : tasks) {
-            outFile << t->getType() << "," << t->getId() << "," << t->getTitle() << "," << t->getIsCompleted() << "\n";
+            outFile << t->getType() << "," << t->getId() << "," << t->getTitle() << "," << t->getIsCompleted();
+            
+            if (t->getType() == "PROJECT") {
+                const ProjectTask* pt = static_cast<const ProjectTask*>(t);
+                int count = pt->getSubtasksCount();
+                outFile << "," << count;
+                for (int i = 0; i < count; i++) {
+                    outFile << "," << pt->getSubtaskName(i) << "," << pt->getSubtaskStatus(i);
+                }
+            }
+            outFile << "\n";
         }
         outFile.close();
         cout << "Задачите бяха успешно записани във файл!\n";
     }
 
+    // Коригиран метод: Вече чете ред по ред и възстановява обектите заедно с подзадачите им
     void loadFromFile(string filename) {
         ifstream inFile(filename);
         if (!inFile) {
@@ -139,20 +153,45 @@ public:
         }
         clearTasks(); 
 
-        string type, id, title, isCompStr;
-        // Четем формат: TYPE,ID,TITLE,ISCOMPLETED
-        while (getline(inFile, type, ',') && 
-               getline(inFile, id, ',') && 
-               getline(inFile, title, ',') && 
-               getline(inFile, isCompStr)) {
+        string line;
+        while (getline(inFile, line)) {
+            if (line.empty()) continue;
+            
+            stringstream ss(line);
+            string type, id, title, isCompStr;
+            
+            getline(ss, type, ',');
+            getline(ss, id, ',');
+            getline(ss, title, ',');
             
             if (type == "SIMPLE") {
+                getline(ss, isCompStr);
                 SimpleTask* st = new SimpleTask(id, title);
                 if (isCompStr == "1") st->setCompleted(true);
                 addTask(st);
-            } else if (type == "PROJECT") {
+            } 
+            else if (type == "PROJECT") {
+                getline(ss, isCompStr, ',');
                 ProjectTask* pt = new ProjectTask(id, title);
                 if (isCompStr == "1") pt->setCompleted(true);
+                
+                string subCountStr;
+                if (getline(ss, subCountStr, ',')) {
+                    int subCount = stoi(subCountStr);
+                    for (int i = 0; i < subCount; i++) {
+                        string subName, subStatusStr;
+                        getline(ss, subName, ',');
+                        if (i == subCount - 1) {
+                            getline(ss, subStatusStr);
+                        } else {
+                            getline(ss, subStatusStr, ',');
+                        }
+                        pt->addSubtask(subName);
+                        if (subStatusStr == "1") {
+                            pt->completeSubtask(i);
+                        }
+                    }
+                }
                 addTask(pt);
             }
         }
@@ -216,9 +255,8 @@ int main() {
                 cin >> id;
                 Task* t = manager.findTaskById(id);
                 
-                // Проверяваме дали задачата съществува и дали е ProjectTask
                 if (t && t->getType() == "PROJECT") {
-                    ProjectTask* pt = (ProjectTask*)t; // Обикновено кастване
+                    ProjectTask* pt = (ProjectTask*)t; 
                     cout << "Име на подзадачата: ";
                     cin.ignore();
                     getline(cin, subtaskName);
