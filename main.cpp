@@ -117,7 +117,50 @@ public:
         for (Task* t : tasks) delete t;
         tasks.clear(); 
     }
+
+    void saveToFile(string filename) {
+        ofstream outFile(filename);
+        if (!outFile) {
+            cout << "Грешка при отваряне на файла за запис!\n";
+            return;
+        }
+        for (const Task* t : tasks) {
+            outFile << t->getType() << "," << t->getId() << "," << t->getTitle() << "," << t->getIsCompleted() << "\n";
+        }
+        outFile.close();
+        cout << "Задачите бяха успешно записани във файл!\n";
+    }
+
+    void loadFromFile(string filename) {
+        ifstream inFile(filename);
+        if (!inFile) {
+            cout << "Няма намерен съществуващ файл със задачи. Започвате на чисто.\n";
+            return;
+        }
+        clearTasks(); 
+
+        string type, id, title, isCompStr;
+        // Четем формат: TYPE,ID,TITLE,ISCOMPLETED
+        while (getline(inFile, type, ',') && 
+               getline(inFile, id, ',') && 
+               getline(inFile, title, ',') && 
+               getline(inFile, isCompStr)) {
+            
+            if (type == "SIMPLE") {
+                SimpleTask* st = new SimpleTask(id, title);
+                if (isCompStr == "1") st->setCompleted(true);
+                addTask(st);
+            } else if (type == "PROJECT") {
+                ProjectTask* pt = new ProjectTask(id, title);
+                if (isCompStr == "1") pt->setCompleted(true);
+                addTask(pt);
+            }
+        }
+        inFile.close();
+        cout << "Задачите бяха успешно заредени от файла!\n";
+    }
 };
+
 
 int main() {
     
