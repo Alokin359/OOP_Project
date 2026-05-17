@@ -161,8 +161,105 @@ public:
     }
 };
 
-
 int main() {
+    TaskManager manager;
     
+    // Автоматично зареждаме старите задачи при стартиране, ако има такива
+    manager.loadFromFile("tasks.txt");
+
+    int choice;
+    string id, title, subtaskName;
+
+    while (true) {
+        cout << "\n=== МЕНИДЖЪР НА ЗАДАЧИ ===\n";
+        cout << "1. Добави обикновена задача (SimpleTask)\n";
+        cout << "2. Добави проектна задача (ProjectTask)\n";
+        cout << "3. Преглед на всички задачи\n";
+        cout << "4. Добави подзадача към проект\n";
+        cout << "5. Маркирай задача като завършена\n";
+        cout << "6. Запиши промените във файл\n";
+        cout << "7. Изход\n";
+        cout << "Избор: ";
+        cin >> choice;
+
+        if (choice == 7) {
+            // Записваме автоматично преди излизане
+            manager.saveToFile("tasks.txt");
+            break;
+        }
+
+        switch (choice) {
+            case 1:
+                cout << "Въведете ID (без интервали): ";
+                cin >> id;
+                cout << "Въведете Заглавие: ";
+                cin.ignore();
+                getline(cin, title);
+                manager.addTask(new SimpleTask(id, title));
+                break;
+
+            case 2:
+                cout << "Въведете ID (без интервали): ";
+                cin >> id;
+                cout << "Въведете Заглавие на проекта: ";
+                cin.ignore();
+                getline(cin, title);
+                manager.addTask(new ProjectTask(id, title));
+                break;
+
+            case 3:
+                manager.printTasks();
+                break;
+
+            case 4: {
+                cout << "Въведете ID на проекта: ";
+                cin >> id;
+                Task* t = manager.findTaskById(id);
+                
+                // Проверяваме дали задачата съществува и дали е ProjectTask
+                if (t && t->getType() == "PROJECT") {
+                    ProjectTask* pt = (ProjectTask*)t; // Обикновено кастване
+                    cout << "Име на подзадачата: ";
+                    cin.ignore();
+                    getline(cin, subtaskName);
+                    pt->addSubtask(subtaskName);
+                    cout << "Подзадачата е добавена!\n";
+                } else {
+                    cout << "Проект с това ID не съществува.\n";
+                }
+                break;
+            }
+
+            case 5: {
+                cout << "Въведете ID на задачата: ";
+                cin >> id;
+                Task* t = manager.findTaskById(id);
+                if (!t) {
+                    cout << "Задачата не е намерена.\n";
+                    break;
+                }
+
+                if (t->getType() == "PROJECT") {
+                    ProjectTask* pt = (ProjectTask*)t;
+                    int subIndex;
+                    cout << "Това е проект. Въведете индекс на подзадачата (0, 1, 2...): ";
+                    cin >> subIndex;
+                    pt->completeSubtask(subIndex);
+                } else {
+                    t->setCompleted(true);
+                }
+                cout << "Статусът е обновен успешно!\n";
+                break;
+            }
+
+            case 6:
+                manager.saveToFile("tasks.txt");
+                break;
+
+            default:
+                cout << "Невалиден избор.\n";
+        }
+    }
+
     return 0;
 }
