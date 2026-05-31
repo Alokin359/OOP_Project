@@ -119,7 +119,6 @@ public:
         }
     }
 
-    // ДОБАВЕН МЕТОД: Филтриране по статус (завършени / незавършени)
     void filterTasks(int filterType) const {
         bool found = false;
         string statusStr = (filterType == 1) ? "ЗАВЪРШЕНИ" : "НЕЗАВЪРШЕНИ";
@@ -137,6 +136,45 @@ public:
         if (!found) {
             cout << "Няма намерени задачи в тази категория.\n";
         }
+    }
+
+    // ДОБАВЕН МЕТОД: Изтриване на задача по ID с освобождаване на паметта
+    bool deleteTask(string id) {
+        for (auto it = tasks.begin(); it != tasks.end(); ++it) {
+            if ((*it)->getId() == id) {
+                delete *it; // Важно: освобождаваме паметта!
+                tasks.erase(it); // Премахваме указателя от вектора
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ДОБАВЕН МЕТОД: Статистика и резюме на задачите
+    void printSummary() const {
+        if (tasks.empty()) {
+            cout << "\nНяма налични задачи за статистика.\n";
+            return;
+        }
+
+        int simpleCount = 0;
+        int projectCount = 0;
+        double totalProgress = 0.0;
+
+        for (const Task* task : tasks) {
+            if (task->getType() == "SIMPLE") simpleCount++;
+            else if (task->getType() == "PROJECT") projectCount++;
+            totalProgress += task->getProgress();
+        }
+
+        double avgProgress = totalProgress / tasks.size();
+
+        cout << "\n--- РЕЗЮМЕ НА ЗАДАЧИТЕ ---\n";
+        cout << "Общ брой задачи: " << tasks.size() << "\n";
+        cout << " -> Обикновени задачи: " << simpleCount << "\n";
+        cout << " -> Проектни задачи: " << projectCount << "\n";
+        cout << "Среден прогрес на системата: " << avgProgress << "%\n";
+        cout << "-------------------------\n";
     }
 
     Task* findTaskById(string id) {
@@ -250,12 +288,14 @@ int main() {
         cout << "5. Маркирай задача като завършена\n";
         cout << "6. Запиши промените във файл\n";
         cout << "7. Търсене на задача по ключова дума\n";
-        cout << "8. Филтриране на задачи (Завършени / Незавършени)\n"; // Нова опция
-        cout << "9. Изход\n"; // Променено от 8 на 9
+        cout << "8. Филтриране на задачи (Завършени / Незавършени)\n";
+        cout << "9. Изтриване на задача по ID\n"; // Нова опция
+        cout << "10. Статистика и резюме\n";       // Нова опция
+        cout << "11. Изход\n";                      // Променено на 11
         cout << "Избор: ";
         cin >> choice;
 
-        if (choice == 9) { // Променено от 8 на 9
+        if (choice == 11) { 
             manager.saveToFile("tasks.txt");
             break;
         }
@@ -334,7 +374,7 @@ int main() {
                 manager.searchTasks(keyword);
                 break;
 
-            case 8: { // Нов case за филтриране
+            case 8: {
                 int filterChoice;
                 cout << "Филтриране:\n1. Завършени задачи\n2. Незавършени задачи\nИзбор: ";
                 cin >> filterChoice;
@@ -345,6 +385,20 @@ int main() {
                 }
                 break;
             }
+
+            case 9:
+                cout << "Въведете ID на задачата за изтриване: ";
+                cin >> id;
+                if (manager.deleteTask(id)) {
+                    cout << "Задачата беше успешно изтрита.\n";
+                } else {
+                    cout << "Задача с такова ID не беше намерена.\n";
+                }
+                break;
+
+            case 10:
+                manager.printSummary();
+                break;
 
             default:
                 cout << "Невалиден избор.\n";
