@@ -7,9 +7,6 @@ Kursova rabota C++
 4
 P1
 Napisvane na klas Task
-5
-P1
-0
 1
 T2
 Nauchi C++ pointers
@@ -17,8 +14,12 @@ Nauchi C++ pointers
 6
 7
 C++
-7
-hliab
-7
-nqma
 8
+1
+5
+T1
+8
+1
+8
+2
+9

@@ -104,7 +104,6 @@ public:
         }
     }
 
-    // ДОБАВЕН МЕТОД: Търсене по ключова дума в заглавието или ID-то
     void searchTasks(const string& keyword) const {
         bool found = false;
         cout << "\n--- РЕЗУЛТАТИ ОТ ТЪРСЕНЕТО: \"" << keyword << "\" ---\n";
@@ -117,6 +116,26 @@ public:
         }
         if (!found) {
             cout << "Няма намерени задачи с тази ключова дума.\n";
+        }
+    }
+
+    // ДОБАВЕН МЕТОД: Филтриране по статус (завършени / незавършени)
+    void filterTasks(int filterType) const {
+        bool found = false;
+        string statusStr = (filterType == 1) ? "ЗАВЪРШЕНИ" : "НЕЗАВЪРШЕНИ";
+        cout << "\n--- " << statusStr << " ЗАДАЧИ ---\n";
+
+        for (const Task* task : tasks) {
+            bool isDone = (task->getProgress() >= 100.0);
+            
+            if ((filterType == 1 && isDone) || (filterType == 2 && !isDone)) {
+                cout << "[" << task->getId() << "] " << task->getTitle() 
+                     << " (" << task->getType() << ") | Прогрес: " << task->getProgress() << "%\n";
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "Няма намерени задачи в тази категория.\n";
         }
     }
 
@@ -220,7 +239,7 @@ int main() {
     manager.loadFromFile("tasks.txt");
 
     int choice;
-    string id, title, subtaskName, keyword; // Добавена е keyword
+    string id, title, subtaskName, keyword;
 
     while (true) {
         cout << "\n=== МЕНИДЖЪР НА ЗАДАЧИ ===\n";
@@ -230,12 +249,13 @@ int main() {
         cout << "4. Добави подзадача към проект\n";
         cout << "5. Маркирай задача като завършена\n";
         cout << "6. Запиши промените във файл\n";
-        cout << "7. Търсене на задача по ключова дума\n"; // Нова опция
-        cout << "8. Изход\n"; // Променено от 7 на 8
+        cout << "7. Търсене на задача по ключова дума\n";
+        cout << "8. Филтриране на задачи (Завършени / Незавършени)\n"; // Нова опция
+        cout << "9. Изход\n"; // Променено от 8 на 9
         cout << "Избор: ";
         cin >> choice;
 
-        if (choice == 8) { // Променено от 7 на 8
+        if (choice == 9) { // Променено от 8 на 9
             manager.saveToFile("tasks.txt");
             break;
         }
@@ -307,12 +327,24 @@ int main() {
                 manager.saveToFile("tasks.txt");
                 break;
 
-            case 7: // Нов case за търсене
+            case 7:
                 cout << "Въведете ключова дума за търсене: ";
                 cin.ignore();
                 getline(cin, keyword);
                 manager.searchTasks(keyword);
                 break;
+
+            case 8: { // Нов case за филтриране
+                int filterChoice;
+                cout << "Филтриране:\n1. Завършени задачи\n2. Незавършени задачи\nИзбор: ";
+                cin >> filterChoice;
+                if (filterChoice == 1 || filterChoice == 2) {
+                    manager.filterTasks(filterChoice);
+                } else {
+                    cout << "Невалиден избор за филтриране.\n";
+                }
+                break;
+            }
 
             default:
                 cout << "Невалиден избор.\n";
