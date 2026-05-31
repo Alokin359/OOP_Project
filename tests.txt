@@ -1,18 +1,24 @@
 1
 T1
-Kupuvane на hliab
-3
+Kupuvane na hliab
 2
 P1
 Kursova rabota C++
 4
 P1
 Napisvane na klas Task
-3
-5
-T1
 5
 P1
 0
+1
+T2
+Nauchi C++ pointers
 3
+6
 7
+C++
+7
+hliab
+7
+nqma
+8
