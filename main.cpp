@@ -94,13 +94,29 @@ public:
 
     void printTasks() const {
         if (tasks.empty()) {
-            cout << "\n Няма намерени задачи.\n";
+            cout << "\nНяма намерени задачи.\n";
             return;
         }
         cout << "\n--- СПИСЪК СЪС ЗАДАЧИ ---\n";
         for (const Task* task : tasks) {
             cout << "[" << task->getId() << "] " << task->getTitle() 
                  << " (" << task->getType() << ") | Прогрес: " << task->getProgress() << "%\n";
+        }
+    }
+
+    // ДОБАВЕН МЕТОД: Търсене по ключова дума в заглавието или ID-то
+    void searchTasks(const string& keyword) const {
+        bool found = false;
+        cout << "\n--- РЕЗУЛТАТИ ОТ ТЪРСЕНЕТО: \"" << keyword << "\" ---\n";
+        for (const Task* task : tasks) {
+            if (task->getTitle().find(keyword) != string::npos || task->getId().find(keyword) != string::npos) {
+                cout << "[" << task->getId() << "] " << task->getTitle() 
+                     << " (" << task->getType() << ") | Прогрес: " << task->getProgress() << "%\n";
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "Няма намерени задачи с тази ключова дума.\n";
         }
     }
 
@@ -120,7 +136,6 @@ public:
         tasks.clear(); 
     }
 
-    // Коригиран метод: Вече записва и подзадачите на проекта на същия ред
     void saveToFile(string filename) {
         ofstream outFile(filename);
         if (!outFile) {
@@ -144,7 +159,6 @@ public:
         cout << "Задачите бяха успешно записани във файл!\n";
     }
 
-    // Коригиран метод: Вече чете ред по ред и възстановява обектите заедно с подзадачите им
     void loadFromFile(string filename) {
         ifstream inFile(filename);
         if (!inFile) {
@@ -203,11 +217,10 @@ public:
 int main() {
     TaskManager manager;
     
-    // Автоматично зареждаме старите задачи при стартиране, ако има такива
     manager.loadFromFile("tasks.txt");
 
     int choice;
-    string id, title, subtaskName;
+    string id, title, subtaskName, keyword; // Добавена е keyword
 
     while (true) {
         cout << "\n=== МЕНИДЖЪР НА ЗАДАЧИ ===\n";
@@ -217,12 +230,12 @@ int main() {
         cout << "4. Добави подзадача към проект\n";
         cout << "5. Маркирай задача като завършена\n";
         cout << "6. Запиши промените във файл\n";
-        cout << "7. Изход\n";
+        cout << "7. Търсене на задача по ключова дума\n"; // Нова опция
+        cout << "8. Изход\n"; // Променено от 7 на 8
         cout << "Избор: ";
         cin >> choice;
 
-        if (choice == 7) {
-            // Записваме автоматично преди излизане
+        if (choice == 8) { // Променено от 7 на 8
             manager.saveToFile("tasks.txt");
             break;
         }
@@ -292,6 +305,13 @@ int main() {
 
             case 6:
                 manager.saveToFile("tasks.txt");
+                break;
+
+            case 7: // Нов case за търсене
+                cout << "Въведете ключова дума за търсене: ";
+                cin.ignore();
+                getline(cin, keyword);
+                manager.searchTasks(keyword);
                 break;
 
             default:
