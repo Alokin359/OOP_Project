@@ -1,2 +1,4 @@
 SIMPLE,T1,Kupuvane на hliab,1
-PROJECT,P1,Kursova rabota C++,0,1,Napisvane na klas Task,1
+PROJECT,P1,Kursova rabota C++,0,2,Napisvane na klas Task,1,Napisvane na klas Task,0
+SIMPLE,T1,Kupuvane на hliab,0
+PROJECT,P1,Kursova rabota C++,0,0
